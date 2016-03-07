@@ -12,11 +12,16 @@ flags.DEFINE_integer("epoch", 25, "Epoch to train [25]")
 flags.DEFINE_integer("word_embed_dim", 650, "The dimension of word embedding matrix [650]")
 flags.DEFINE_integer("char_embed_dim", 15, "The dimension of char embedding matrix [15]")
 flags.DEFINE_integer("max_word_length", 65, "The maximum length of word [65]")
-flags.DEFINE_integer("batch_size", 100, "The size of batch images [100]")
+flags.DEFINE_integer("batch_size", 20, "The size of batch images [20]")
 flags.DEFINE_integer("seq_length", 35, "The # of timesteps to unroll for [35]")
+flags.DEFINE_integer("highway_layers", 2, "number of highway layers [2]")
+flags.DEFINE_integer("num_layers", 2, "number of layers in the LSTM [2]")
+flags.DEFINE_integer("hsm", 0, "number of clusters to use for hsm. [0] = normal softmax, -1 = use sqrt(|V|)")
+flags.DEFINE_integer("rnn_size", 650, "size of LSTM internal state [650]")
 flags.DEFINE_float("learning_rate", 1.0, "Learning rate [1.0]")
 flags.DEFINE_float("decay", 0.5, "Decay of SGD [0.5]")
 flags.DEFINE_float("dropout_prob", 0.5, "Probability of dropout layer [0.5]")
+flags.DEFINE_float("max_grad_norm", 5, "normalize gradients at [5]")
 flags.DEFINE_string("feature_maps", "[50,100,150,200,200,200,200]", "The # of feature maps in CNN [50,100,150,200,200,200,200]")
 flags.DEFINE_string("kernels", "[1,2,3,4,5,6,7]", "The width of CNN kernels [1,2,3,4,5,6,7]")
 flags.DEFINE_string("model", "LSTMTDNN", "The type of model to train and test [LSTM, LSTMTDNN]")
@@ -26,6 +31,8 @@ flags.DEFINE_string("checkpoint_dir", "checkpoint", "Directory name to save the 
 flags.DEFINE_boolean("forward_only", False, "True for forward only, False for training [False]")
 flags.DEFINE_boolean("use_char", True, "Use character-level language model [True]")
 flags.DEFINE_boolean("use_word", False, "Use word-level language [False]")
+flags.DEFINE_boolean("use_batch_norm", False, "use batch normalization over input embeddings [False]")
+flags.DEFINE_boolean("use_progressbar", False, "print out loss [False]")
 FLAGS = flags.FLAGS
 
 model_dict = {
@@ -54,6 +61,13 @@ def main(_):
                                     dataset_name=FLAGS.dataset,
                                     use_char=FLAGS.use_char,
                                     use_word=FLAGS.use_word,
+                                    hsm=FLAGS.hsm,
+                                    max_grad_norm=FLAGS.max_grad_norm,
+                                    highway_layers=FLAGS.highway_layers,
+                                    layer_depth=FLAGS.num_layers,
+                                    use_batch_norm=FLAGS.use_batch_norm,
+                                    rnn_size=FLAGS.rnn_size,
+                                    use_progressbar=FLAGS.use_progressbar,
                                     data_dir=FLAGS.data_dir)
 
     if not FLAGS.forward_only:
